@@ -1,0 +1,9 @@
+{
+  "name": "hibou",
+  "version": "1.0.0",
+  "description": "A tiny API for evaluating student code features",
+  "dependencies": {
+    "acorn": "^0.11.0",
+    "esprima": "^2.0.0"
+  }
+}
