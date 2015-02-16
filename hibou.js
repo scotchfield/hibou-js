@@ -3,6 +3,14 @@ var hibou = (function () {
 
     if (typeof module !== 'undefined' && module.exports) {
         var acorn = require('acorn');
+    } else {
+        var acorn = window.acorn;
+        if (typeof acorn === 'undefined') {
+            throw {
+                name: 'AcornNotFoundError',
+                message: 'Acorn not found'
+            };
+        }
     }
 
     var exports = {}, root = false,
@@ -83,7 +91,7 @@ var hibou = (function () {
     return exports;
 }());
 
-var code = 'var answer = 6 * 7; for (var i=0; i<10; i+=1) { x = y; }';
+/*var code = 'var answer = 6 * 7; for (var i=0; i<10; i+=1) { x = y; }';
 
 console.log(hibou.whitelist(code, 'ForStatement'));
 console.log(hibou.whitelist(code, ['ForStatement', 'VariableDeclaration']));
@@ -94,3 +102,4 @@ console.log(hibou.blacklist(code, 'VariableDeclaration'));
 console.log(hibou.blacklist(code, ['ForStatement', 'VariableDeclaration']));
 console.log(hibou.blacklist(code, ['None', 'ForStatement']));
 console.log(hibou.blacklist(code, ['ForStatement', 'None']));
+*/
