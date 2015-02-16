@@ -4,6 +4,10 @@
   "description": "A tiny API for evaluating student code features",
   "dependencies": {
     "acorn": "^0.11.0",
-    "esprima": "^2.0.0"
+    "esprima": "^2.0.0",
+    "qunit": "^0.7.5"
+  },
+  "devDependencies": {
+    "qunitjs": "^1.17.1"
   }
 }

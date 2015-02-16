@@ -32,27 +32,43 @@ var hibou = (function () {
         return false;
     };
 
-    exports.whitelist = function (code) {
+    exports.whitelist = function (code, node_type) {
         var tree = acorn.parse(code), i, result = true;
 
-        for (i = 1; i < arguments.length; i += 1) {
-            if (! has_node(tree, arguments[i])) {
-                result = arguments[i];
-                break;
+        if (typeof node_type === 'string') {
+            if (false === has_node(tree, node_type)) {
+                result = node_type;
             }
+        } else if (is_array(node_type)) {
+            for (i = 0; i < node_type.length; i += 1) {
+                tree = has_node(tree, node_type[i]);
+                if (false === tree) {
+                    result = node_type[i];
+                    break;
+                }
+            }
+
         }
 
         return result;
     };
 
-    exports.blacklist = function (code, rules) {
+    exports.blacklist = function (code, node_type) {
         var tree = acorn.parse(code), i, result = false;
 
-        for (i = 1; i < arguments.length; i += 1) {
-            if (has_node(tree, arguments[i])) {
-                result = arguments[i];
-                break;
+        if (typeof node_type === 'string') {
+            if (has_node(tree, node_type)) {
+                result = node_type;
             }
+        } else if (is_array(node_type)) {
+            for (i = 0; i < node_type.length; i += 1) {
+                tree = has_node(tree, node_type[i]);
+                if (false !== tree) {
+                    result = node_type[i];
+                    break;
+                }
+            }
+
         }
 
         return result;
@@ -69,5 +85,12 @@ var hibou = (function () {
 
 var code = 'var answer = 6 * 7; for (var i=0; i<10; i+=1) { x = y; }';
 
-console.log(hibou.whitelist(code, 'ForStatement', 'AssignStatement'));
-console.log(hibou.blacklist(code, 'ForStatement', 'AssignStatement'));
+console.log(hibou.whitelist(code, 'ForStatement'));
+console.log(hibou.whitelist(code, ['ForStatement', 'VariableDeclaration']));
+console.log(hibou.whitelist(code, ['None', 'ForStatement']));
+console.log(hibou.whitelist(code, ['ForStatement', 'None']));
+
+console.log(hibou.blacklist(code, 'VariableDeclaration'));
+console.log(hibou.blacklist(code, ['ForStatement', 'VariableDeclaration']));
+console.log(hibou.blacklist(code, ['None', 'ForStatement']));
+console.log(hibou.blacklist(code, ['ForStatement', 'None']));
