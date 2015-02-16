@@ -51,19 +51,30 @@ for (i = 0; i < 10; i +=1 ) {
 <script src="../hibou.js" type="text/javascript" charset="utf-8"></script>
 
 <script>
-var embedded_editor;
+var editor;
+
 $(function() {
-    if (typeof ace !== "undefined") {
-        embedded_editor = ace.edit("embedded_ace_code");
-        embedded_editor.container.style.opacity = "";
-        embedded_editor.session.setMode("ace/mode/javascript");
-        embedded_editor.setAutoScrollEditorIntoView(true);
-        embedded_editor.setOption("maxLines", 40);
+    if (typeof ace !== 'undefined') {
+        editor = ace.edit('embedded_ace_code');
+        editor.container.style.opacity = '';
+        editor.session.setMode('ace/mode/javascript');
+        editor.setAutoScrollEditorIntoView(true);
+        editor.setOption('maxLines', 24);
+
+        editor.check_id = false;
+
+        editor.checkCode = function () {
+            alert(hibou.blacklist(editor.getValue(), 'ForStatement'));
+        }
+
+        editor.on('input', function(e) {
+            if (false !== editor.check_id) {
+                clearTimeout(editor.check_id);
+            }
+            editor.check_id = setTimeout(editor.checkCode, 1000);
+        });
     }
 });
-/*    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/github");
-    editor.getSession().setMode("ace/mode/javascript");*/
 </script>
 
 </body>
