@@ -85,7 +85,8 @@ var hibou = (function () {
     exports.expected = function (code, rules) {
         var tree = acorn.parse(code);
 
-        return get_missing_rules(check_rules(tree, rules), rules);
+        return '';
+        //return get_missing_rules(check_rules(tree, rules), rules);
     };
 
     return exports;

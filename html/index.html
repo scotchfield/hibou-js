@@ -4,13 +4,10 @@
 <meta charset="utf-8" />
 <title>Hibou: Owl-eyed Testing</title>
 <style type="text/css">
-    #eeeditor { 
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
+div.container {
+  margin: auto;
+  width: 960px;
+}
 
 #ace_editor_demo, #embedded_ace_code {
     height: 275px;
@@ -27,6 +24,23 @@
 .header {
   text-align: center;
 }
+
+.invis {
+  display: none;
+}
+
+div.hibou_result {
+  margin: auto;
+  margin-top: 16px;
+  padding: 16px;
+  text-align: center;
+  width: 50%;
+
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  background-color: #7CFC00;//66FF00;
+}
 </style>
 </head>
 <body>
@@ -42,6 +56,18 @@ var answer = 6 * 7, i;
 for (i = 0; i < 10; i +=1 ) {
     x = y;
 }</pre>
+
+<div class="hibou_result invis" id="whitelist">
+  Whitelist results
+</div>
+
+<div class="hibou_result invis" id="blacklist">
+  Blacklist results
+</div>
+
+<div class="hibou_result invis" id="expected">
+  Expected results
+</div>
 
 </div>
 
@@ -64,13 +90,27 @@ $(function() {
         editor.check_id = false;
 
         editor.checkCode = function () {
-            alert(hibou.blacklist(editor.getValue(), 'ForStatement'));
-        }
+            $('#whitelist').removeClass('invis')
+                .html('Whitelist results: ' + hibou.whitelist(
+                    editor.getValue(), 'ForStatement'));
+
+            $('#blacklist').removeClass('invis')
+                .html('Blacklist results: ' + hibou.blacklist(
+                    editor.getValue(), 'ForStatement'));
+
+            $('#expected').removeClass('invis')
+                .html('Expected results: ' + hibou.expected(
+                    editor.getValue(), 'ForStatement'));
+        };
 
         editor.on('input', function(e) {
             if (false !== editor.check_id) {
                 clearTimeout(editor.check_id);
             }
+
+            $('#whitelist').addClass('invis');
+            $('#blacklist').addClass('invis');
+            $('#expected').addClass('invis');
             editor.check_id = setTimeout(editor.checkCode, 1000);
         });
     }
