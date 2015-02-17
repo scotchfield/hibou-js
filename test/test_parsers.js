@@ -1,7 +1,7 @@
 var fs = require('fs');
 
-var acorn = require("acorn");
-var esprima = require("esprima");
+var acorn = require('acorn');
+var esprima = require('esprima');
 
 function nanotime() {
     var t = process.hrtime();

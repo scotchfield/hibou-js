@@ -1,10 +1,12 @@
 var hibou = (function () {
     'use strict';
 
+    var acorn;
+
     if (typeof module !== 'undefined' && module.exports) {
-        var acorn = require('acorn');
+        acorn = require('acorn');
     } else {
-        var acorn = window.acorn;
+        acorn = window.acorn;
         if (typeof acorn === 'undefined') {
             throw {
                 name: 'AcornNotFoundError',
@@ -22,7 +24,7 @@ var hibou = (function () {
     has_node = function (node, type) {
         var child, subchild;
 
-        if (node['type'] === type) {
+        if (node.type === type) {
             return node;
         }
 
@@ -92,15 +94,6 @@ var hibou = (function () {
     return exports;
 }());
 
-/*var code = 'var answer = 6 * 7; for (var i=0; i<10; i+=1) { x = y; }';
-
-console.log(hibou.whitelist(code, 'ForStatement'));
-console.log(hibou.whitelist(code, ['ForStatement', 'VariableDeclaration']));
-console.log(hibou.whitelist(code, ['None', 'ForStatement']));
-console.log(hibou.whitelist(code, ['ForStatement', 'None']));
-
-console.log(hibou.blacklist(code, 'VariableDeclaration'));
-console.log(hibou.blacklist(code, ['ForStatement', 'VariableDeclaration']));
-console.log(hibou.blacklist(code, ['None', 'ForStatement']));
-console.log(hibou.blacklist(code, ['ForStatement', 'None']));
-*/
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = hibou;
+}
