@@ -3,45 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <title>Hibou: Owl-eyed Testing</title>
-<style type="text/css">
-div.container {
-  margin: auto;
-  width: 960px;
-}
-
-#ace_editor_demo, #embedded_ace_code {
-    height: 275px;
-    border: 1px solid #DDD;
-    border-radius: 4px;
-    border-bottom-right-radius: 0px;
-    margin-top: 5px;
-}
-
-#embedded_ace_code {
-    height: 525px;
-}
-
-.header {
-  text-align: center;
-}
-
-.invis {
-  display: none;
-}
-
-div.hibou_result {
-  margin: auto;
-  margin-top: 16px;
-  padding: 16px;
-  text-align: center;
-  width: 50%;
-
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 20px;
-  background-color: #7CFC00;//66FF00;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="css/main.css" />
 </head>
 <body>
 
@@ -50,24 +12,16 @@ div.hibou_result {
     <img src="img/hibou.png" width="128" height="128" />
   </div>
 
-<pre id="embedded_ace_code" style="opacity:0">
+  <pre id="ace_editor_hibou" style="opacity:0">
 var answer = 6 * 7, i;
 
 for (i = 0; i < 10; i +=1 ) {
     x = y;
 }</pre>
 
-<div class="hibou_result invis" id="whitelist">
-  Whitelist results
-</div>
-
-<div class="hibou_result invis" id="blacklist">
-  Blacklist results
-</div>
-
-<div class="hibou_result invis" id="expected">
-  Expected results
-</div>
+  <div class="hibou_result invis" id="whitelist"></div>
+  <div class="hibou_result invis" id="blacklist"></div>
+  <div class="hibou_result invis" id="expected"></div>
 
 </div>
 
@@ -75,47 +29,7 @@ for (i = 0; i < 10; i +=1 ) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.8/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/acorn.js" type="text/javascript" charset="utf=8"></script>
 <script src="../hibou.js" type="text/javascript" charset="utf-8"></script>
-
-<script>
-var editor;
-
-$(function() {
-    if (typeof ace !== 'undefined') {
-        editor = ace.edit('embedded_ace_code');
-        editor.container.style.opacity = '';
-        editor.session.setMode('ace/mode/javascript');
-        editor.setAutoScrollEditorIntoView(true);
-        editor.setOption('maxLines', 24);
-
-        editor.check_id = false;
-
-        editor.checkCode = function () {
-            $('#whitelist').removeClass('invis')
-                .html('Whitelist results: ' + hibou.whitelist(
-                    editor.getValue(), 'ForStatement'));
-
-            $('#blacklist').removeClass('invis')
-                .html('Blacklist results: ' + hibou.blacklist(
-                    editor.getValue(), 'ForStatement'));
-
-            $('#expected').removeClass('invis')
-                .html('Expected results: ' + hibou.expected(
-                    editor.getValue(), 'ForStatement'));
-        };
-
-        editor.on('input', function(e) {
-            if (false !== editor.check_id) {
-                clearTimeout(editor.check_id);
-            }
-
-            $('#whitelist').addClass('invis');
-            $('#blacklist').addClass('invis');
-            $('#expected').addClass('invis');
-            editor.check_id = setTimeout(editor.checkCode, 1000);
-        });
-    }
-});
-</script>
+<script src="js/main.js" type="text/javascript" charset="utf-8"></script>
 
 </body>
 </html>
