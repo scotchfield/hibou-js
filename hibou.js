@@ -15,7 +15,7 @@ var hibou = (function () {
         }
     }
 
-    var exports = {}, root = false,
+    var exports = {},
 
     is_array = function (value) {
         return Object.prototype.toString.apply(value) === '[object Array]';
@@ -42,54 +42,56 @@ var hibou = (function () {
         return false;
     };
 
-    exports.whitelist = function (code, node_type) {
-        var tree = acorn.parse(code), i, result = true;
-
-        if (typeof node_type === 'string') {
-            if (false === has_node(tree, node_type)) {
-                result = node_type;
-            }
-        } else if (is_array(node_type)) {
-            for (i = 0; i < node_type.length; i += 1) {
-                tree = has_node(tree, node_type[i]);
-                if (false === tree) {
-                    result = node_type[i];
-                    break;
-                }
-            }
-
-        }
-
-        return result;
-    };
-
-    exports.blacklist = function (code, node_type) {
-        var tree = acorn.parse(code), i, result = false;
-
-        if (typeof node_type === 'string') {
-            if (has_node(tree, node_type)) {
-                result = node_type;
-            }
-        } else if (is_array(node_type)) {
-            for (i = 0; i < node_type.length; i += 1) {
-                tree = has_node(tree, node_type[i]);
-                if (false !== tree) {
-                    result = node_type[i];
-                    break;
-                }
-            }
-
-        }
-
-        return result;
-    };
-
-    exports.expected = function (code, rules) {
+    exports.whitelist = function (code, node) {
         var tree = acorn.parse(code);
 
-        return '';
-        //return get_missing_rules(check_rules(tree, rules), rules);
-    };
+        return (function () {
+            var i;
+            node = is_array(node) ? node : [node];
+            for (i = 0; i < node.length; i += 1) {
+                tree = has_node(tree, node[i]);
+                if (false === tree) {
+                    return node;
+                }
+            }
+            return true;
+        }());
+    }
+
+    exports.blacklist = function (code, node) {
+        var tree = acorn.parse(code);
+
+        return (function () {
+            var i;
+            node = is_array(node) ? node : [node];
+            for (i = 0; i < node.length; i += 1) {
+                tree = has_node(tree, node[i]);
+                if (false !== tree) {
+                    return node;
+                }
+            }
+            return true;
+        }());
+    }
+
+    exports.expected = function (code) {
+        var tree = acorn.parse(code);
+
+        return (function (args) {
+            var i, j, result = [], node;
+            for (j = 1; j < args.length; j += 1) {
+                node = is_array(args[j]) ? args[j] : [args[j]];
+                for (i = 0; i < node.length; i += 1) {
+                    tree = has_node(tree, node[i]);
+                    if (false === tree) {
+                        result.push(node);
+                        break;
+                    }
+                }
+            }
+            return result.length ? result : true;
+        }(arguments));
+    }
 
     return exports;
 }());
