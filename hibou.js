@@ -1,16 +1,16 @@
 var hibou = (function () {
     'use strict';
 
-    var acorn;
+    var parser;
 
     if (typeof module !== 'undefined' && module.exports) {
-        acorn = require('acorn');
+        parser = require('acorn');
     } else {
-        acorn = window.acorn;
-        if (typeof acorn === 'undefined') {
+        parser = window.acorn;
+        if (typeof parser === 'undefined') {
             throw {
-                name: 'AcornNotFoundError',
-                message: 'Acorn not found'
+                name: 'ParserNotFoundError',
+                message: 'Parser not found'
             };
         }
     }
@@ -23,15 +23,14 @@ var hibou = (function () {
 
     has_node = function (node, type) {
         var child, subchild;
-
-        if (node.type === type) {
+console.log(node);
+        if (node === type || node && node.type === type) {
             return node;
         }
 
         for (child in node) {
             if (node.hasOwnProperty(child) &&
-                    node[child] && typeof node[child] === 'object' &&
-                    is_array(node[child])) {
+                    node[child] && typeof node[child] === 'object') {
                 for (subchild in node[child]) {
                     if (has_node(node[child][subchild], type)) {
                         return node;
@@ -39,18 +38,20 @@ var hibou = (function () {
                 }
             }
         }
+
         return false;
     };
 
     exports.whitelist = function (code, node) {
-        var tree = acorn.parse(code);
+        var tree = parser.parse(code);
 
         return (function () {
-            var i;
+            var i, root;
             node = is_array(node) ? node : [node];
+            root = tree;
             for (i = 0; i < node.length; i += 1) {
-                tree = has_node(tree, node[i]);
-                if (false === tree) {
+                root = has_node(root, node[i]);
+                if (false === root) {
                     return node;
                 }
             }
@@ -59,14 +60,15 @@ var hibou = (function () {
     }
 
     exports.blacklist = function (code, node) {
-        var tree = acorn.parse(code);
+        var tree = parser.parse(code);
 
         return (function () {
-            var i;
+            var i, root;
             node = is_array(node) ? node : [node];
+            root = tree;
             for (i = 0; i < node.length; i += 1) {
-                tree = has_node(tree, node[i]);
-                if (false !== tree) {
+                root = has_node(root, node[i]);
+                if (false !== root) {
                     return node;
                 }
             }
@@ -75,15 +77,16 @@ var hibou = (function () {
     }
 
     exports.expected = function (code) {
-        var tree = acorn.parse(code);
+        var tree = parser.parse(code);
 
         return (function (args) {
-            var i, j, result = [], node;
+            var i, j, result = [], node, root;
             for (j = 1; j < args.length; j += 1) {
                 node = is_array(args[j]) ? args[j] : [args[j]];
+                root = tree;
                 for (i = 0; i < node.length; i += 1) {
-                    tree = has_node(tree, node[i]);
-                    if (false === tree) {
+                    root = has_node(root, node[i]);
+                    if (false === root) {
                         result.push(node);
                         break;
                     }
