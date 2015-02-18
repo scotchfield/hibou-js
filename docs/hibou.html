@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>hibou.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>hibou.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>hibou.js, providing a whitelist, blacklist, and expected structure to
+complement standard unit testing.</p>
+<p>hibou.js exposes three functions to window (inside a browser) or to
+global (inside node.js).</p>
+<ul>
+<li>whitelist: Accepts a JavaScript string and a single rule, and returns true if the rule is matched, otherwise false.</li>
+<li>blacklist: Accepts a JavaScript string and a single rule, and returns false if the rule is matched, otherwise true.</li>
+<li>expected: Accepts a JavaScript string and any number of additional rules as arguments. Returns true if all rules match, or an array of unmatched rules.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-keyword">var</span> hibou = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="hljs-pi">    'use strict'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Define a variable to hold our parser. hibou uses the Acorn parser
+because it is faster than Esprima while offering the same AST format.
+However, we can switch out if necessary.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> parser;
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">module</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">module</span>.exports) {
+        parser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'acorn'</span>);
+    } <span class="hljs-keyword">else</span> {
+        parser = <span class="hljs-built_in">window</span>.acorn;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> parser === <span class="hljs-string">'undefined'</span>) {
+            <span class="hljs-keyword">throw</span> {
+                name: <span class="hljs-string">'ParserNotFoundError'</span>,
+                message: <span class="hljs-string">'Parser not found'</span>
+            };
+        }
+    }
+
+    <span class="hljs-keyword">var</span> exports = {},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Borrowing <em>is_array</em> from (Crockford 2008)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    is_array = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(value)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.toString.apply(value) === <span class="hljs-string">'[object Array]'</span>;
+    },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Accept a node in the AST (for example, the root from <em>parse</em>), and
+a string describing the type of the node. Recursively iterate down the
+tree to see if the node exists. If the node is not found, return false.
+Otherwise, return the node.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    has_node = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(node, type)</span> </span>{
+        <span class="hljs-keyword">var</span> child, subchild;
+
+        <span class="hljs-keyword">if</span> (! node) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+
+        <span class="hljs-keyword">if</span> (node === type || node.type === type) {
+            <span class="hljs-keyword">return</span> node;
+        }
+
+        <span class="hljs-keyword">for</span> (child <span class="hljs-keyword">in</span> node) {
+            <span class="hljs-keyword">if</span> (node.hasOwnProperty(child) &amp;&amp;
+                    node[child] &amp;&amp; <span class="hljs-keyword">typeof</span> node[child] === <span class="hljs-string">'object'</span>) {
+                <span class="hljs-keyword">for</span> (subchild <span class="hljs-keyword">in</span> node[child]) {
+                    <span class="hljs-keyword">if</span> (has_node(node[child][subchild], type)) {
+                        <span class="hljs-keyword">return</span> node;
+                    }
+                }
+            }
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Accepts a JavaScript code string and a node rule to find.
+node may be either a single string (for example, ‘ForStatement’),
+or an array of strings corresponding to successive child nodes in the
+AST (for example, [‘ForStatement’, ‘IfStatement’] represents a
+for-statement that contains an if-statement).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    exports.whitelist = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(code, node)</span> </span>{
+        <span class="hljs-keyword">var</span> tree = parser.parse(code);
+
+        <span class="hljs-keyword">return</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">var</span> i, root;
+            node = is_array(node) ? node : [node];
+            root = tree;
+            <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; node.length; i += <span class="hljs-number">1</span>) {
+                root = has_node(root, node[i]);
+                <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span> === root) {
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+                }
+            }
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        }());
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Accepts a JavaScript code string and a node rule to find.
+The rule format is similar to <em>whitelist</em> above. If a rule is not
+found, return true. Otherwise, if the rule is found while it has been
+blacklisted, return false.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    exports.blacklist = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(code, node)</span> </span>{
+        <span class="hljs-keyword">var</span> tree = parser.parse(code);
+
+        <span class="hljs-keyword">return</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">var</span> i, root, child, result = <span class="hljs-literal">true</span>;
+            node = is_array(node) ? node : [node];
+            root = tree;
+            <span class="hljs-keyword">for</span> (child <span class="hljs-keyword">in</span> node) {
+                root = has_node(root, node[child]);
+                <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span> !== root) {
+                    result = <span class="hljs-literal">false</span>;
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+                }
+            }
+            <span class="hljs-keyword">return</span> result;
+        }());
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Accepts a JavaScript code string and any number of additional rules
+to find. If all of the provided rules match, return true. Otherwise,
+return an array containing each of the unmatched rules.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    exports.expected = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(code)</span> </span>{
+        <span class="hljs-keyword">var</span> tree = parser.parse(code);
+
+        <span class="hljs-keyword">return</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(args)</span> </span>{
+            <span class="hljs-keyword">var</span> i, j, result = [], node, root;
+            <span class="hljs-keyword">for</span> (j = <span class="hljs-number">1</span>; j &lt; args.length; j += <span class="hljs-number">1</span>) {
+                node = is_array(args[j]) ? args[j] : [args[j]];
+                root = tree;
+                <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; node.length; i += <span class="hljs-number">1</span>) {
+                    root = has_node(root, node[i]);
+                    <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span> === root) {
+                        result.push(node);
+                        <span class="hljs-keyword">break</span>;
+                    }
+                }
+            }
+            <span class="hljs-keyword">return</span> result.length ? result : <span class="hljs-literal">true</span>;
+        }(<span class="hljs-built_in">arguments</span>));
+    }
+
+    <span class="hljs-keyword">return</span> exports;
+}());</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Allow node.js to see hibou.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">module</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-keyword">typeof</span> <span class="hljs-built_in">module</span>.exports !== <span class="hljs-string">'undefined'</span>) {
+    <span class="hljs-built_in">module</span>.exports = hibou;
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 var editor;
 
-$(function() {
+$(function () {
     if (typeof ace !== 'undefined') {
         editor = ace.edit('ace_editor_hibou');
         editor.container.style.opacity = '';
@@ -12,19 +12,19 @@ $(function() {
 
         editor.checkCode = function () {
             $('#whitelist').removeClass('invis')
-                .html('Whitelist results: ' + hibou.whitelist(
+                .html('Whitelist results (ForStatement): ' + hibou.whitelist(
                     editor.getValue(), 'ForStatement'));
 
             $('#blacklist').removeClass('invis')
-                .html('Blacklist results: ' + hibou.blacklist(
+                .html('Blacklist results (ForStatement): ' + hibou.blacklist(
                     editor.getValue(), 'ForStatement'));
 
             $('#expected').removeClass('invis')
-                .html('Expected results: ' + hibou.expected(
+                .html('Expected results (ForStatement): ' + hibou.expected(
                     editor.getValue(), 'ForStatement'));
             };
 
-        editor.on('input', function(e) {
+        editor.on('input', function() {
             if (false !== editor.check_id) {
                 clearTimeout(editor.check_id);
             }
