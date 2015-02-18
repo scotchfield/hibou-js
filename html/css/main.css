@@ -4,15 +4,15 @@ div.container {
 }
 
 #ace_editor_hibou {
-    height: 275px;
-    border: 1px solid #DDD;
-    border-radius: 4px;
-    border-bottom-right-radius: 0px;
-    margin-top: 5px;
+  height: 275px;
+  border: 1px solid #DDD;
+  border-radius: 4px;
+  border-bottom-right-radius: 0px;
+  margin-top: 5px;
 }
 
 #ace_editor_hibou {
-    height: 525px;
+  height: 525px;
 }
 
 .header {
