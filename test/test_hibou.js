@@ -52,24 +52,42 @@ QUnit.test('Blacklist nested examples that are caught', function(assert) {
     assert.equal(hibou.blacklist(code, ['IfStatement', 'FunctionExpression', 'ReturnStatement']), false);
 });
 
-QUnit.test('Basic blacklist examples', function(assert) {
-    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { x = y; }';
+QUnit.test('Expected single-token examples that pass', function(assert) {
+    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { if (true) { x = y; } }';
 
-    assert.equal(hibou.blacklist(code, 'VariableDeclaration'), false);
-    assert.equal(hibou.blacklist(code, ['ForStatement', 'VariableDeclaration']), false);
-    assert.equal(hibou.blacklist(code, ['None', 'ForStatement']), true);
-    assert.equal(hibou.blacklist(code, ['ForStatement', 'None']), true);
+    assert.equal(hibou.expected(code, 'VariableDeclaration'), true);
+    assert.equal(hibou.expected(code, 'ForStatement'), true);
+    assert.equal(hibou.expected(code, 'IfStatement'), true);
 });
 
-QUnit.test('Basic expected examples', function(assert) {
-    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { x = y; }';
+QUnit.test('Expected single-token examples that are caught', function(assert) {
+    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { if (true) { x = y; } }';
 
-    assert.equal(hibou.expected(code, 'ForStatement'), true);
+    assert.equal(hibou.expected(code, 'None'), ['None'].toString());
+    assert.equal(hibou.expected(code, 'WhileStatement'), ['WhileStatement'].toString());
+    assert.equal(hibou.expected(code, 'SwitchStatement'), ['SwitchStatement'].toString());
+});
+
+QUnit.test('Expected nested examples that pass', function(assert) {
+    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { if (true) { x = y; } }';
+
     assert.equal(hibou.expected(code, ['ForStatement', 'VariableDeclaration']), true);
+    assert.equal(hibou.expected(code, ['ForStatement', 'IfStatement']), true);
+    assert.equal(hibou.expected(code, ['IfStatement', 'VariableDeclaration']), true);
+});
+
+QUnit.test('Expected nested examples that are caught', function(assert) {
+    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { if (true) { x = y; } }';
+
     assert.equal(hibou.expected(code, ['None', 'ForStatement']),
                  [['None', 'ForStatement']].toString());
     assert.equal(hibou.expected(code, ['ForStatement', 'None']),
                  [['ForStatement', 'None']].toString());
+});
+
+QUnit.test('Expected examples using multiple arguments', function(assert) {
+    var code = 'var answer = 6 * 7; for (var i = 0; i < 10; i += 1) { if (true) { x = y; } }';
 
     assert.equal(hibou.expected(code, 'VariableDeclaration', 'ForStatement'), true);
+    assert.equal(hibou.expected(code, 'VariableDeclaration', 'ForStatement', 'IfStatement'), true);
 });
